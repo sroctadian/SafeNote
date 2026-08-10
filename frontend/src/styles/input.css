@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .note-card {
+    @apply bg-base-200 border border-base-300 rounded-xl p-4 hover:border-primary/60 transition-colors cursor-pointer;
+  }
+  .btn-icon {
+    @apply btn btn-ghost btn-sm btn-circle;
+  }
+  .page {
+    @apply min-h-screen bg-base-100 text-base-content;
+  }
+  .pin-dot {
+    @apply w-3 h-3 rounded-full bg-base-300;
+  }
+  .pin-dot-filled {
+    @apply bg-primary;
+  }
+
+  /* Quill editor: align with DaisyUI theme colors instead of its default
+     light-only "snow" palette, so it reads correctly in dark mode too. */
+  .ql-toolbar.ql-snow {
+    @apply bg-base-200 border-base-300 rounded-t-lg;
+  }
+  .ql-container.ql-snow {
+    @apply bg-base-100 border-base-300 rounded-b-lg text-base-content;
+    font-size: 0.95rem;
+  }
+  .ql-editor {
+    min-height: 200px;
+  }
+  .ql-snow .ql-stroke {
+    stroke: currentColor;
+  }
+  .ql-snow .ql-fill {
+    fill: currentColor;
+  }
+  .ql-snow .ql-picker {
+    color: currentColor;
+  }
+}

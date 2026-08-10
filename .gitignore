@@ -1,0 +1,6 @@
+build/bin
+build/windows/installer
+
+frontend/node_modules
+frontend/dist
+

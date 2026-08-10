@@ -1,0 +1,49 @@
+export function layout(activeRoute, content) {
+  const navItem = (path, label, icon) => `
+    <a href="#${path}" class="btn btn-ghost btn-sm justify-start gap-2 ${
+    activeRoute === path ? "btn-active" : ""
+  }">
+      <span>${icon}</span> ${label}
+    </a>`;
+
+  return `
+    <div class="drawer lg:drawer-open min-h-screen">
+      <input id="nav-drawer" type="checkbox" class="drawer-toggle" />
+      <div class="drawer-content flex flex-col">
+        <div class="navbar bg-base-200 border-b border-base-300 lg:hidden">
+          <label for="nav-drawer" class="btn btn-square btn-ghost">☰</label>
+          <span class="text-lg font-semibold ml-2">SafeNote</span>
+        </div>
+        <main class="flex-1 p-4 md:p-8 max-w-6xl w-full mx-auto">
+          ${content}
+        </main>
+      </div>
+      <div class="drawer-side">
+        <label for="nav-drawer" class="drawer-overlay"></label>
+        <aside class="w-64 bg-base-200 border-r border-base-300 min-h-full p-4 flex flex-col gap-1">
+          <div class="text-xl font-bold px-2 mb-4 flex items-center gap-2">🔒 SafeNote</div>
+          ${navItem("/home", "Home", "🏠")}
+          ${navItem("/create", "New Note", "➕")}
+          ${navItem("/settings", "Settings", "⚙️")}
+          ${navItem("/backup", "Backup", "📤")}
+          ${navItem("/restore", "Restore", "📥")}
+          ${navItem("/about", "About", "ℹ️")}
+        </aside>
+      </div>
+    </div>
+  `;
+}
+
+export function toast(message, kind = "info") {
+  const el = document.createElement("div");
+  el.className = "toast toast-top toast-end z-50";
+  el.innerHTML = `<div class="alert alert-${kind}"><span>${escapeHtml(message)}</span></div>`;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+export function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str ?? "";
+  return div.innerHTML;
+}
