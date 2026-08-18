@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=SafeNote
+Comment=Offline, encrypted note-taking desktop app.
+Exec=safenote
+Icon=safenote
+Categories=Utility;
