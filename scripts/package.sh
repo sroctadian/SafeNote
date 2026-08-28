@@ -87,7 +87,7 @@ build_deb() {
         -d "$DEB_DEPENDS" \
         -p "$OUTPUT_DIR/${APP_NAME}_${VERSION}_amd64.deb" \
         "$BINARY_PATH=/usr/bin/$APP_NAME" \
-        "$ICON_DIR=/usr/share/icons/hicolor" \
+        "$ICON_DIR=/usr/share/icons" \
         "$DESKTOP_PATH=/usr/share/applications/$APP_NAME.desktop"
 
     echo -e "${GREEN}✓ .deb package created: $OUTPUT_DIR/${APP_NAME}_${VERSION}_amd64.deb${NC}"
@@ -108,7 +108,7 @@ build_rpm() {
         -d "$RPM_DEPENDS" \
         -p "$OUTPUT_DIR/${APP_NAME}-${VERSION}-1.x86_64.rpm" \
         "$BINARY_PATH=/usr/bin/$APP_NAME" \
-        "$ICON_DIR=/usr/share/icons/hicolor" \
+        "$ICON_DIR=/usr/share/icons" \
         "$DESKTOP_PATH=/usr/share/applications/$APP_NAME.desktop"
 
     echo -e "${GREEN}✓ .rpm package created: $OUTPUT_DIR/${APP_NAME}-${VERSION}-1.x86_64.rpm${NC}"
