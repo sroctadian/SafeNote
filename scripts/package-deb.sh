@@ -24,13 +24,13 @@ fi
 # Configuration (all paths relative to PROJECT_ROOT)
 APP_NAME="safenote"
 BINARY_PATH="$PROJECT_ROOT/build/bin/${APP_NAME}"
-ICON_PATH="$PROJECT_ROOT/build/linux/${APP_NAME}.png"
+ICON_DIR="$PROJECT_ROOT/build/linux/icons/hicolor"
 DESKTOP_PATH="$PROJECT_ROOT/build/linux/${APP_NAME}.desktop"
 OUTPUT_DIR="$PROJECT_ROOT/dist"
 BUILD_DIR="$PROJECT_ROOT/tmp/deb-build"
 
 # Dependencies
-DEPENDS="libwebkit2gtk-4.1-0"
+DEPENDS="libgtk-3-0, libwebkit2gtk-4.1-0"
 
 # Check if required files exist
 check_files() {
@@ -41,8 +41,8 @@ check_files() {
         missing=1
     fi
 
-    if [ ! -f "$ICON_PATH" ]; then
-        echo -e "${RED}Error: Icon not found at $ICON_PATH${NC}"
+    if [ ! -d "$ICON_DIR" ]; then
+        echo -e "${RED}Error: Icon set not found at $ICON_DIR (run scripts/make-icons.py)${NC}"
         missing=1
     fi
 
@@ -68,14 +68,14 @@ echo -e "${GREEN}Building .deb package (version $VERSION)...${NC}"
 # Create directory structure
 mkdir -p "$BUILD_DIR/DEBIAN"
 mkdir -p "$BUILD_DIR/usr/bin"
-mkdir -p "$BUILD_DIR/usr/share/icons/hicolor/256x256/apps"
+mkdir -p "$BUILD_DIR/usr/share/icons/hicolor"
 mkdir -p "$BUILD_DIR/usr/share/applications"
 
 # Copy files
 cp "$BINARY_PATH" "$BUILD_DIR/usr/bin/$APP_NAME"
 chmod +x "$BUILD_DIR/usr/bin/$APP_NAME"
 
-cp "$ICON_PATH" "$BUILD_DIR/usr/share/icons/hicolor/256x256/apps/$APP_NAME.png"
+cp -r "$ICON_DIR/." "$BUILD_DIR/usr/share/icons/hicolor/"
 
 cp "$DESKTOP_PATH" "$BUILD_DIR/usr/share/applications/$APP_NAME.desktop"
 

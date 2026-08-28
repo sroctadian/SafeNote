@@ -25,13 +25,13 @@ fi
 # Configuration (all paths relative to PROJECT_ROOT)
 APP_NAME="safenote"
 BINARY_PATH="$PROJECT_ROOT/build/bin/${APP_NAME}"
-ICON_PATH="$PROJECT_ROOT/build/linux/${APP_NAME}.png"
+ICON_DIR="$PROJECT_ROOT/build/linux/icons/hicolor"
 DESKTOP_PATH="$PROJECT_ROOT/build/linux/${APP_NAME}.desktop"
 OUTPUT_DIR="$PROJECT_ROOT/dist"
 
 # Dependencies
-DEB_DEPENDS="libwebkit2gtk-4.1-0"
-RPM_DEPENDS="webkit2gtk-4.1"
+DEB_DEPENDS="libgtk-3-0, libwebkit2gtk-4.1-0"
+RPM_DEPENDS="gtk3, webkit2gtk-4.1"
 
 # Check if required files exist
 check_files() {
@@ -42,8 +42,8 @@ check_files() {
         missing=1
     fi
 
-    if [ ! -f "$ICON_PATH" ]; then
-        echo -e "${RED}Error: Icon not found at $ICON_PATH${NC}"
+    if [ ! -d "$ICON_DIR" ]; then
+        echo -e "${RED}Error: Icon set not found at $ICON_DIR (run scripts/make-icons.py)${NC}"
         missing=1
     fi
 
@@ -87,7 +87,7 @@ build_deb() {
         -d "$DEB_DEPENDS" \
         -p "$OUTPUT_DIR/${APP_NAME}_${VERSION}_amd64.deb" \
         "$BINARY_PATH=/usr/bin/$APP_NAME" \
-        "$ICON_PATH=/usr/share/icons/hicolor/256x256/apps/$APP_NAME.png" \
+        "$ICON_DIR=/usr/share/icons/hicolor" \
         "$DESKTOP_PATH=/usr/share/applications/$APP_NAME.desktop"
 
     echo -e "${GREEN}✓ .deb package created: $OUTPUT_DIR/${APP_NAME}_${VERSION}_amd64.deb${NC}"
@@ -108,7 +108,7 @@ build_rpm() {
         -d "$RPM_DEPENDS" \
         -p "$OUTPUT_DIR/${APP_NAME}-${VERSION}-1.x86_64.rpm" \
         "$BINARY_PATH=/usr/bin/$APP_NAME" \
-        "$ICON_PATH=/usr/share/icons/hicolor/256x256/apps/$APP_NAME.png" \
+        "$ICON_DIR=/usr/share/icons/hicolor" \
         "$DESKTOP_PATH=/usr/share/applications/$APP_NAME.desktop"
 
     echo -e "${GREEN}✓ .rpm package created: $OUTPUT_DIR/${APP_NAME}-${VERSION}-1.x86_64.rpm${NC}"
