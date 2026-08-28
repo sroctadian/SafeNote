@@ -1,8 +1,10 @@
 import { api } from "../api.js";
-import { navigate } from "../router.js";
+import { navigate, onCleanup } from "../router.js";
 import { layout, toast, escapeHtml } from "../components/layout.js";
 import { promptPin, showPinError } from "../components/pinModal.js";
 import { deltaToPlainText } from "../components/richEditor.js";
+import { forgetUnlock } from "../noteSession.js";
+import { copyToClipboardWithAutoClear } from "../clipboard.js";
 
 const state = {
   search: "",
@@ -77,6 +79,7 @@ export async function homePage() {
       `
     ),
     mount: async (root) => {
+      forgetUnlock(); // arriving at Home always exits any unlocked-note context
       await loadAndRender(root);
 
       root.querySelector("#search-input").addEventListener(
@@ -109,6 +112,7 @@ export async function homePage() {
       });
 
       document.addEventListener("keydown", globalShortcuts);
+      onCleanup(() => document.removeEventListener("keydown", globalShortcuts));
     },
   };
 }
@@ -180,12 +184,23 @@ function renderPagination(el, total) {
 }
 
 function attachCardHandlers(root) {
+  // Clicking anywhere on the card opens the note (same as the "Open"
+  // button); icon buttons inside stop propagation so they don't also
+  // trigger a navigation.
+  root.querySelectorAll(".note-card").forEach((card) =>
+    card.addEventListener("click", () => navigate(`/view?id=${card.dataset.id}`))
+  );
+
   root.querySelectorAll(".open-btn").forEach((btn) =>
-    btn.addEventListener("click", () => navigate(`/view?id=${btn.dataset.id}`))
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      navigate(`/view?id=${btn.dataset.id}`);
+    })
   );
 
   root.querySelectorAll(".fav-btn").forEach((btn) =>
-    btn.addEventListener("click", async () => {
+    btn.addEventListener("click", async (e) => {
+      e.stopPropagation();
       const id = btn.dataset.id;
       const current = btn.dataset.fav === "true";
       try {
@@ -198,7 +213,8 @@ function attachCardHandlers(root) {
   );
 
   root.querySelectorAll(".pin-btn").forEach((btn) =>
-    btn.addEventListener("click", async () => {
+    btn.addEventListener("click", async (e) => {
+      e.stopPropagation();
       const id = btn.dataset.id;
       const current = btn.dataset.pinned === "true";
       try {
@@ -211,7 +227,10 @@ function attachCardHandlers(root) {
   );
 
   root.querySelectorAll(".copy-btn").forEach((btn) =>
-    btn.addEventListener("click", () => copyNoteFlow(btn.dataset.id))
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      copyNoteFlow(btn.dataset.id);
+    })
   );
 }
 
@@ -221,14 +240,7 @@ async function copyNoteFlow(id) {
   try {
     const note = await api.openNote(id, pin);
     const plainText = deltaToPlainText(note.content);
-    await api.setClipboardText(plainText);
-    toast("Note content copied to clipboard.", "success");
-
-    const settings = await api.getSettings();
-    const seconds = settings.clipboardClearSeconds || 20;
-    if (seconds > 0) {
-      setTimeout(() => api.clearClipboard(), seconds * 1000);
-    }
+    await copyToClipboardWithAutoClear(plainText);
   } catch (err) {
     showPinError(err.message);
     toast(err.message, "error");

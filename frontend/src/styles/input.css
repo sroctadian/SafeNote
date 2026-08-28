@@ -31,6 +31,26 @@
   .ql-editor {
     min-height: 200px;
   }
+
+  /* Fixed-height editor wrapper (see .editor-shell below): toolbar has
+     its natural height, the Quill container fills the remaining space,
+     and only .ql-editor scrolls internally — so long notes never
+     require scrolling up to find the formatting toolbar. */
+  .editor-shell {
+    display: flex;
+    flex-direction: column;
+  }
+  .editor-shell .ql-toolbar.ql-snow {
+    flex-shrink: 0;
+  }
+  .editor-shell .ql-container.ql-snow {
+    flex: 1 1 auto;
+    min-height: 0; /* allow flex child to shrink so its content can scroll */
+  }
+  .editor-shell .ql-editor {
+    height: 100%;
+    overflow-y: auto;
+  }
   .ql-snow .ql-stroke {
     stroke: currentColor;
   }

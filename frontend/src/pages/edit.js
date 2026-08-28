@@ -1,8 +1,9 @@
 import { api } from "../api.js";
-import { navigate } from "../router.js";
+import { navigate, onCleanup } from "../router.js";
 import { layout, toast, escapeHtml } from "../components/layout.js";
 import { promptPin } from "../components/pinModal.js";
 import { createEditor, parseStoredContent, serializeContent, isContentEmpty } from "../components/richEditor.js";
+import { rememberUnlock, getRememberedPin } from "../noteSession.js";
 
 export async function editPage(params) {
   const id = params.id;
@@ -25,15 +26,19 @@ export async function editPage(params) {
       }
       const container = root.querySelector("#edit-container");
 
-      const pin = await promptPin("Enter PIN to edit this note");
-      if (pin === null) {
-        navigate(`/view?id=${id}`);
-        return;
+      let pin = getRememberedPin(id);
+      if (!pin) {
+        pin = await promptPin("Enter PIN to edit this note");
+        if (pin === null) {
+          navigate(`/view?id=${id}`);
+          return;
+        }
       }
 
       let note;
       try {
         note = await api.openNote(id, pin);
+        rememberUnlock(id, pin); // keep/refresh cache for this note
       } catch (err) {
         toast(err.message, "error");
         navigate(`/view?id=${id}`);
@@ -45,8 +50,8 @@ export async function editPage(params) {
         <h1 class="text-2xl font-bold">Edit Note</h1>
         <input id="title-input" type="text" class="input input-bordered w-full"
           value="${escapeHtml(note.title)}" maxlength="75" />
-        <div class="bg-base-100 border border-base-300 rounded-lg overflow-hidden">
-          <div id="content-editor" style="min-height: 240px;"></div>
+        <div class="editor-shell bg-base-100 border border-base-300 rounded-lg overflow-hidden h-[45vh] min-h-[280px] max-h-[520px]">
+          <div id="content-editor"></div>
         </div>
         <input id="tags-input" type="text" class="input input-bordered w-full"
           value="${escapeHtml((note.tags || []).join(", "))}" placeholder="Tags (comma separated)" />
@@ -104,6 +109,7 @@ export async function editPage(params) {
         }
       };
       document.addEventListener("keydown", keyHandler);
+      onCleanup(() => document.removeEventListener("keydown", keyHandler));
     },
   };
 }

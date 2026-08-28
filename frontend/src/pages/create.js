@@ -1,5 +1,5 @@
 import { api } from "../api.js";
-import { navigate } from "../router.js";
+import { navigate, onCleanup } from "../router.js";
 import { layout, toast } from "../components/layout.js";
 import { createEditor, serializeContent, isContentEmpty } from "../components/richEditor.js";
 
@@ -13,8 +13,8 @@ export async function createPage() {
         <input id="title-input" type="text" placeholder="Title"
           class="input input-bordered w-full" maxlength="75" />
         <div class="text-xs opacity-60 -mt-2"><span id="title-count">0</span> / 75 characters</div>
-        <div class="bg-base-100 border border-base-300 rounded-lg overflow-hidden">
-          <div id="content-editor" style="min-height: 240px;"></div>
+        <div class="editor-shell bg-base-100 border border-base-300 rounded-lg overflow-hidden h-[45vh] min-h-[280px] max-h-[520px]">
+          <div id="content-editor"></div>
         </div>
         <input id="tags-input" type="text" placeholder="Tags (comma separated, max 25 chars each, optional)"
           class="input input-bordered w-full" />
@@ -95,6 +95,7 @@ export async function createPage() {
         }
       };
       document.addEventListener("keydown", keyHandler);
+      onCleanup(() => document.removeEventListener("keydown", keyHandler));
     },
   };
 }

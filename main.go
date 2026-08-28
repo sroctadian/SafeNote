@@ -18,10 +18,10 @@ func main() {
 	safeApp := app.NewApp()
 
 	err := wails.Run(&options.App{
-		Title:  "SafeNote",
-		Width:  1100,
-		Height: 750,
-		MinWidth: 900,
+		Title:     "SafeNote",
+		Width:     1100,
+		Height:    750,
+		MinWidth:  900,
 		MinHeight: 600,
 		AssetServer: &assetserver.Options{
 			Assets: assets,

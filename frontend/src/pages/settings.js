@@ -26,7 +26,7 @@ export async function settingsPage() {
               placeholder="New Secret Key (min. 32 characters)"></textarea>
             <p class="text-xs opacity-60 mt-1">
               Note: existing notes remain tied to the Secret Key active when they were
-              created/edited.
+              created/edited. See docs/ADR.md for the re-encryption rollout strategy.
             </p>
             <button id="change-sk-btn" class="btn btn-sm btn-primary mt-2 self-end">Change Secret Key</button>
           </div>
