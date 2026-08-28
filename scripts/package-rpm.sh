@@ -25,12 +25,12 @@ fi
 # Configuration (all paths relative to PROJECT_ROOT)
 APP_NAME="safenote"
 BINARY_PATH="$PROJECT_ROOT/build/bin/${APP_NAME}"
-ICON_PATH="$PROJECT_ROOT/build/linux/${APP_NAME}.png"
+ICON_DIR="$PROJECT_ROOT/build/linux/icons/hicolor"
 DESKTOP_PATH="$PROJECT_ROOT/build/linux/${APP_NAME}.desktop"
 OUTPUT_DIR="$PROJECT_ROOT/dist"
 
 # Dependencies
-REQUIRES="webkit2gtk-4.1"
+REQUIRES="gtk3, webkit2gtk-4.1"
 
 # Check if required files exist
 check_files() {
@@ -41,8 +41,8 @@ check_files() {
         missing=1
     fi
 
-    if [ ! -f "$ICON_PATH" ]; then
-        echo -e "${RED}Error: Icon not found at $ICON_PATH${NC}"
+    if [ ! -d "$ICON_DIR" ]; then
+        echo -e "${RED}Error: Icon set not found at $ICON_DIR (run scripts/make-icons.py)${NC}"
         missing=1
     fi
 
@@ -79,7 +79,7 @@ rm -rf "$SOURCE_DIR"
 mkdir -p "$SOURCE_DIR"
 
 cp "$BINARY_PATH" "$SOURCE_DIR/$APP_NAME"
-cp "$ICON_PATH" "$SOURCE_DIR/$APP_NAME.png"
+cp -r "$ICON_DIR" "$SOURCE_DIR/hicolor"
 cp "$DESKTOP_PATH" "$SOURCE_DIR/$APP_NAME.desktop"
 
 # Create source tar (save and restore current directory)
@@ -119,16 +119,17 @@ your data encrypted and private.
 rm -rf %{buildroot}
 
 install -d %{buildroot}%{_bindir}
-install -d %{buildroot}%{_datadir}/icons/hicolor/256x256/apps
 install -d %{buildroot}%{_datadir}/applications
 
 install -m 755 %{name} %{buildroot}%{_bindir}/%{name}
-install -m 644 %{name}.png %{buildroot}%{_datadir}/icons/hicolor/256x256/apps/%{name}.png
+for icon in hicolor/*/apps/%{name}.png; do
+  install -D -m 644 "$icon" "%{buildroot}%{_datadir}/icons/$icon"
+done
 install -m 644 %{name}.desktop %{buildroot}%{_datadir}/applications/%{name}.desktop
 
 %files
 %{_bindir}/%{name}
-%{_datadir}/icons/hicolor/256x256/apps/%{name}.png
+%{_datadir}/icons/hicolor/*/apps/%{name}.png
 %{_datadir}/applications/%{name}.desktop
 
 %changelog
