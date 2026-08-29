@@ -14,7 +14,7 @@ export function layout(activeRoute, content) {
       <input id="nav-drawer" type="checkbox" class="drawer-toggle" />
       <div class="drawer-content flex flex-col">
         <div class="navbar bg-base-200 border-b border-base-300 lg:hidden">
-          <label for="nav-drawer" class="btn btn-square btn-ghost">☰</label>
+          <label for="nav-drawer" class="btn btn-square btn-ghost" aria-label="Open navigation menu">☰</label>
           <img src="${logoUrl}" alt="SafeNote" class="w-6 h-6 ml-2" />
           <span class="text-lg font-semibold ml-2">SafeNote</span>
         </div>

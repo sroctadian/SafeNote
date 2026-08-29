@@ -20,6 +20,8 @@ export function ExportBackup(arg1:string):Promise<domain.BackupFile>;
 
 export function ExportConfig(arg1:string):Promise<void>;
 
+export function GetDataDirectory():Promise<string>;
+
 export function GetMaskedSecretKey():Promise<string>;
 
 export function GetSettings():Promise<domain.Settings>;
@@ -40,7 +42,11 @@ export function RestoreBackup(arg1:string,arg2:Array<string>):Promise<number>;
 
 export function SaveFileDialog(arg1:string):Promise<string>;
 
+export function SelectDirectoryDialog():Promise<string>;
+
 export function SetClipboardText(arg1:string):Promise<void>;
+
+export function SetDataDirectory(arg1:string):Promise<app.DataDirStatus>;
 
 export function SetFavorite(arg1:string,arg2:boolean):Promise<void>;
 

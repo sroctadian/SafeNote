@@ -90,4 +90,4 @@ config directory (`os.UserConfigDir()`):
   accidentally switched to `mattn/go-sqlite3` without a C toolchain.
 - **Blank window / assets not found**: run `cd frontend && npm run build`
   once so `frontend/dist` exists before `wails build` (it embeds that
-  directory via `//go:embed all:../../frontend/dist` in `cmd/safenote/main.go`).
+  directory via `//go:embed all:frontend/dist` in `main.go`).

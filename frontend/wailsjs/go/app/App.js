@@ -34,6 +34,10 @@ export function ExportConfig(arg1) {
   return window['go']['app']['App']['ExportConfig'](arg1);
 }
 
+export function GetDataDirectory() {
+  return window['go']['app']['App']['GetDataDirectory']();
+}
+
 export function GetMaskedSecretKey() {
   return window['go']['app']['App']['GetMaskedSecretKey']();
 }
@@ -74,8 +78,16 @@ export function SaveFileDialog(arg1) {
   return window['go']['app']['App']['SaveFileDialog'](arg1);
 }
 
+export function SelectDirectoryDialog() {
+  return window['go']['app']['App']['SelectDirectoryDialog']();
+}
+
 export function SetClipboardText(arg1) {
   return window['go']['app']['App']['SetClipboardText'](arg1);
+}
+
+export function SetDataDirectory(arg1) {
+  return window['go']['app']['App']['SetDataDirectory'](arg1);
 }
 
 export function SetFavorite(arg1, arg2) {

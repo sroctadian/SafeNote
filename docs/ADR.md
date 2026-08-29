@@ -89,3 +89,47 @@ cooldown only needs to survive within a running session, and keeping it
 out of the database avoids adding another place brute-force attempt
 metadata could leak. Restarting the app resets cooldowns — an accepted
 trade-off given the also-required Argon2id cost per guess.
+
+## ADR-007: Custom data directory copies the vault key alongside the database
+
+**Decision**: `SetDataDirectory` (Settings → Data Location) lets the
+user relocate SafeNote's storage to any folder — including one already
+synced by Dropbox, OneDrive, Syncthing, etc, as a zero-server way to
+share notes across their own devices. When moving to a fresh folder,
+this copies `vault.key` alongside `safenote.db`, not just the database.
+
+**Rationale**: ADR-003 established `vault.key` as a local-machine-only
+key specifically so database theft alone doesn't expose the (wrapped)
+Secret Key. Cross-device sync breaks that assumption at the root: the
+`settings.encrypted_secret` column is ciphertext produced by encrypting
+the Secret Key *with* `vault.key`, so a second device can only decrypt
+it by having that exact same `vault.key`. There is no way to make a
+synced database usable on another machine without either (a) the vault
+key traveling with it, or (b) asking the user to redo first-run Secret
+Key setup independently per device — which would create a *different*
+wrapped Secret Key per device and silently desynchronize decryption.
+Option (a) was chosen as the only one that makes the feature actually
+work as advertised.
+
+**Consequence**: Anyone who gains access to a synced folder (a
+compromised cloud account, a misconfigured share, a stolen laptop with
+the sync client logged in) now has both files needed to attempt
+decrypting the Secret Key — the defense-in-depth ADR-003 provided is
+intentionally traded away for exactly the folders the user opts into
+syncing. This is disclosed in-app (Settings → Data Location) at the
+point the user chooses a custom folder, not buried in documentation
+only.
+
+**Not affected**: The default, non-customized data directory
+(`$UserConfigDir/SafeNote`) is never synced by this feature and keeps
+ADR-003's original guarantee intact. Per-note encryption (Argon2id +
+AES-256-GCM, still keyed by Secret Key + per-note PIN) is unchanged
+either way — a stolen synced folder does not decrypt any note content
+without also knowing every note's PIN.
+
+**Alternative considered**: A dedicated sync *service* (separate
+product, zero-knowledge server, real conflict resolution) avoids this
+trade-off entirely by never asking a local vault key to leave the
+device at all. That's a larger, separate initiative — see chat
+discussion on "SafeNote Cloud" as a distinct product rather than a
+mode of the offline app.

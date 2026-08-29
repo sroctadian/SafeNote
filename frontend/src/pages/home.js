@@ -23,7 +23,7 @@ function noteCardHtml(note) {
   return `
     <div class="note-row" data-id="${note.id}">
       <div class="note-row-delete-bg">
-        <button class="delete-reveal-btn" data-id="${note.id}" title="Delete note">
+        <button class="delete-reveal-btn" data-id="${note.id}" title="Delete note" aria-label="Delete note">
           ${icon("trash", "w-5 h-5")}
           <span>Delete</span>
         </button>
@@ -32,10 +32,16 @@ function noteCardHtml(note) {
         <div class="flex items-start justify-between">
           <h3 class="font-semibold truncate pr-2">${escapeHtml(note.title)}</h3>
           <div class="flex gap-1 shrink-0">
-            <button class="btn-icon fav-btn" data-id="${note.id}" data-fav="${note.favorite}" title="Favorite">
+            <button class="btn-icon fav-btn" data-id="${note.id}" data-fav="${note.favorite}"
+              title="${note.favorite ? "Remove from favorites" : "Add to favorites"}"
+              aria-label="${note.favorite ? "Remove from favorites" : "Add to favorites"}"
+              aria-pressed="${note.favorite}">
               ${icon("star", "w-4 h-4", { solid: note.favorite })}
             </button>
-            <button class="btn-icon pin-btn" data-id="${note.id}" data-pinned="${note.pinned}" title="Pin">
+            <button class="btn-icon pin-btn" data-id="${note.id}" data-pinned="${note.pinned}"
+              title="${note.pinned ? "Unpin note" : "Pin note"}"
+              aria-label="${note.pinned ? "Unpin note" : "Pin note"}"
+              aria-pressed="${note.pinned}">
               ${icon("bookmark", "w-4 h-4", { solid: note.pinned })}
             </button>
           </div>
@@ -43,8 +49,8 @@ function noteCardHtml(note) {
         <div class="text-xs opacity-60 mt-2">Created ${created}</div>
         <div class="text-xs opacity-60">Updated ${updated}</div>
         <div class="card-actions justify-end mt-3 gap-1">
-          <button class="btn-icon copy-btn" data-id="${note.id}" title="Copy">${icon("clipboardDocument", "w-4 h-4")}</button>
-          <button class="btn-icon open-btn" data-id="${note.id}" title="Open">${icon("eye", "w-4 h-4")}</button>
+          <button class="btn-icon copy-btn" data-id="${note.id}" title="Copy note content" aria-label="Copy note content">${icon("clipboardDocument", "w-4 h-4")}</button>
+          <button class="btn-icon open-btn" data-id="${note.id}" title="Open note" aria-label="Open note">${icon("eye", "w-4 h-4")}</button>
         </div>
       </div>
     </div>

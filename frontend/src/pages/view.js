@@ -68,9 +68,9 @@ function renderNote(container, note, id) {
     <div class="flex items-start justify-between">
       <h1 class="text-2xl font-bold break-words pr-4">${escapeHtml(note.title)}</h1>
       <div class="flex gap-1 shrink-0">
-        <button id="copy-btn" class="btn-icon" title="Copy note">${icon("clipboardDocument")}</button>
-        <button id="edit-btn" class="btn-icon" title="Edit note">${icon("pencilSquare")}</button>
-        <button id="delete-btn" class="btn-icon text-error" title="Delete note">${icon("trash")}</button>
+        <button id="copy-btn" class="btn-icon" title="Copy note" aria-label="Copy note">${icon("clipboardDocument")}</button>
+        <button id="edit-btn" class="btn-icon" title="Edit note" aria-label="Edit note">${icon("pencilSquare")}</button>
+        <button id="delete-btn" class="btn-icon text-error" title="Delete note" aria-label="Delete note">${icon("trash")}</button>
       </div>
     </div>
     ${

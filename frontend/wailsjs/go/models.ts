@@ -1,5 +1,25 @@
 export namespace app {
 	
+	export class DataDirStatus {
+	    newPath: string;
+	    adopted: boolean;
+	    moved: boolean;
+	    oldDataBackedUp: boolean;
+	    restartRequired: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new DataDirStatus(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.newPath = source["newPath"];
+	        this.adopted = source["adopted"];
+	        this.moved = source["moved"];
+	        this.oldDataBackedUp = source["oldDataBackedUp"];
+	        this.restartRequired = source["restartRequired"];
+	    }
+	}
 	export class ListNotesResult {
 	    notes: domain.NoteCard[];
 	    total: number;
