@@ -35,6 +35,9 @@ export const api = {
   updateClipboardTimeout: (seconds) => call("UpdateClipboardTimeout", seconds),
   exportConfig: (path) => call("ExportConfig", path),
   importConfig: (path) => call("ImportConfig", path),
+  getDataDirectory: () => call("GetDataDirectory"),
+  selectDirectoryDialog: () => call("SelectDirectoryDialog"),
+  setDataDirectory: (path) => call("SetDataDirectory", path),
 
   // Notes
   createNote: (title, content, pin, tags) => call("CreateNote", title, content, pin, tags || []),

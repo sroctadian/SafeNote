@@ -12,8 +12,11 @@
    "Info": {
     "companyName": "SR Labs",
     "productName": "Safe Note",
-    "productVersion": "0.1.1",
+    "productVersion": "0.1.6",
     "copyright": "srlabs",
-    "comments": "Built using Wails (https://wails.io)"
+    "comments": "An offline-first, encrypted note application."
+  },
+  "postBuildHooks": {
+    "windows/amd64": "powershell -Command \"$v = (Get-Content ../../wails.json | ConvertFrom-Json).info.productVersion; Copy-Item safenote.exe safenote-v$v.exe -Force\""
   }
 }

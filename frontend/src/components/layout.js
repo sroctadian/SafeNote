@@ -1,9 +1,12 @@
+import { icon } from "./icons.js";
+import logoUrl from "../assets/logo.png";
+
 export function layout(activeRoute, content) {
-  const navItem = (path, label, icon) => `
+  const navItem = (path, label, iconName) => `
     <a href="#${path}" class="btn btn-ghost btn-sm justify-start gap-2 ${
     activeRoute === path ? "btn-active" : ""
   }">
-      <span>${icon}</span> ${label}
+      ${icon(iconName, "w-5 h-5")} ${label}
     </a>`;
 
   return `
@@ -11,7 +14,8 @@ export function layout(activeRoute, content) {
       <input id="nav-drawer" type="checkbox" class="drawer-toggle" />
       <div class="drawer-content flex flex-col">
         <div class="navbar bg-base-200 border-b border-base-300 lg:hidden">
-          <label for="nav-drawer" class="btn btn-square btn-ghost">☰</label>
+          <label for="nav-drawer" class="btn btn-square btn-ghost" aria-label="Open navigation menu">☰</label>
+          <img src="${logoUrl}" alt="SafeNote" class="w-6 h-6 ml-2" />
           <span class="text-lg font-semibold ml-2">SafeNote</span>
         </div>
         <main class="flex-1 p-4 md:p-8 max-w-6xl w-full mx-auto">
@@ -21,13 +25,15 @@ export function layout(activeRoute, content) {
       <div class="drawer-side">
         <label for="nav-drawer" class="drawer-overlay"></label>
         <aside class="w-64 bg-base-200 border-r border-base-300 min-h-full p-4 flex flex-col gap-1">
-          <div class="text-xl font-bold px-2 mb-4 flex items-center gap-2">🔒 SafeNote</div>
-          ${navItem("/home", "Home", "🏠")}
-          ${navItem("/create", "New Note", "➕")}
-          ${navItem("/settings", "Settings", "⚙️")}
-          ${navItem("/backup", "Backup", "📤")}
-          ${navItem("/restore", "Restore", "📥")}
-          ${navItem("/about", "About", "ℹ️")}
+          <div class="text-xl font-bold px-2 mb-4 flex items-center gap-2">
+            <img src="${logoUrl}" alt="SafeNote" class="w-7 h-7" /> SafeNote
+          </div>
+          ${navItem("/home", "Home", "home")}
+          ${navItem("/create", "New Note", "plus")}
+          ${navItem("/settings", "Settings", "cog")}
+          ${navItem("/backup", "Backup", "arrowUpTray")}
+          ${navItem("/restore", "Restore", "arrowDownTray")}
+          ${navItem("/about", "About", "informationCircle")}
         </aside>
       </div>
     </div>

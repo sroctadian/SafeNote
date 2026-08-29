@@ -39,7 +39,7 @@ func NewApp() *App {
 func (a *App) Startup(ctx context.Context) {
 	a.ctx = ctx
 
-	dataDir, err := appDataDir()
+	dataDir, err := ResolveDataDir()
 	if err != nil {
 		runtime.LogFatalf(ctx, "resolve app data dir: %v", err)
 		return
@@ -80,13 +80,10 @@ func (a *App) Shutdown(ctx context.Context) {
 	}
 }
 
-func appDataDir() (string, error) {
-	base, err := os.UserConfigDir()
-	if err != nil {
-		return "", fmt.Errorf("app: resolve user config dir: %w", err)
-	}
-	return filepath.Join(base, "SafeNote"), nil
-}
+// Data directory resolution now lives in datalocation.go
+// (fixedConfigRoot / ResolveDataDir / SetDataDirectory), which supports
+// pointing SafeNote at a custom folder (e.g. one synced via Dropbox/
+// OneDrive/Syncthing) — see ADR-007.
 
 // ---- First-run / Settings ----
 
@@ -243,4 +240,28 @@ func (a *App) OpenFileDialog() (string, error) {
 			{DisplayName: "SafeNote Backup (*.json)", Pattern: "*.json"},
 		},
 	})
+}
+
+// ---- Data location (custom data directory) ----
+//
+// Lets the user point SafeNote's database + vault key at a folder of
+// their choosing — e.g. one already synced by Dropbox/OneDrive/
+// Syncthing — as a zero-server way to share notes across devices.
+// See docs/ADR.md (ADR-007) for the security trade-off this involves.
+
+func (a *App) GetDataDirectory() (string, error) {
+	return ResolveDataDir()
+}
+
+func (a *App) SelectDirectoryDialog() (string, error) {
+	return runtime.OpenDirectoryDialog(a.ctx, runtime.OpenDialogOptions{
+		Title: "Choose a folder for SafeNote's data",
+	})
+}
+
+func (a *App) SetDataDirectory(newPath string) (DataDirStatus, error) {
+	if newPath == "" {
+		return DataDirStatus{}, fmt.Errorf("app: no directory selected")
+	}
+	return SetDataDirectory(newPath)
 }

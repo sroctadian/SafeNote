@@ -3,8 +3,9 @@ import { navigate, onCleanup } from "../router.js";
 import { layout, toast, escapeHtml } from "../components/layout.js";
 import { promptPin, showPinError } from "../components/pinModal.js";
 import { createEditor, parseStoredContent, deltaToPlainText } from "../components/richEditor.js";
-import { rememberUnlock, forgetUnlock } from "../noteSession.js";
+import { rememberUnlock, forgetUnlock, getRememberedPin } from "../noteSession.js";
 import { copyToClipboardWithAutoClear } from "../clipboard.js";
+import { icon } from "../components/icons.js";
 
 export async function viewPage(params) {
   const id = params.id;
@@ -14,9 +15,8 @@ export async function viewPage(params) {
       "/home",
       `
       <div class="max-w-2xl mx-auto flex flex-col gap-4">
-        <div id="view-container" class="flex flex-col items-center justify-center py-24 gap-4">
-          <div class="text-lg opacity-70">This note is encrypted.</div>
-          <button id="unlock-btn" class="btn btn-primary">🔓 Enter PIN to Open</button>
+        <div id="view-container" class="flex items-center justify-center py-24">
+          <div class="loading loading-spinner loading-lg"></div>
         </div>
       </div>
       `
@@ -29,9 +29,22 @@ export async function viewPage(params) {
 
       const container = root.querySelector("#view-container");
 
-      const unlock = async () => {
-        const pin = await promptPin("Enter PIN to open this note");
-        if (pin === null) return;
+      // REV1: no intermediate "This note is encrypted" screen — the PIN
+      // dialog opens immediately, same as before but without the extra
+      // click. On a wrong PIN, re-prompt automatically (rate-limited by
+      // the backend's existing lockout tracker) rather than dumping the
+      // user back on a dead-end screen. If we already unlocked this
+      // exact note moments ago (e.g. coming back from Edit), reuse that
+      // PIN instead of asking again.
+      const attemptUnlock = async (useCache = true) => {
+        let pin = useCache ? getRememberedPin(id) : null;
+        if (!pin) {
+          pin = await promptPin("Enter PIN to open this note");
+          if (pin === null) {
+            navigate("/home");
+            return;
+          }
+        }
         try {
           const note = await api.openNote(id, pin);
           rememberUnlock(id, pin);
@@ -39,10 +52,11 @@ export async function viewPage(params) {
         } catch (err) {
           showPinError(err.message);
           toast(err.message, "error");
+          attemptUnlock(false); // never retry with a cached PIN that just failed
         }
       };
 
-      root.querySelector("#unlock-btn").addEventListener("click", unlock);
+      attemptUnlock();
     },
   };
 }
@@ -53,10 +67,10 @@ function renderNote(container, note, id) {
   container.innerHTML = `
     <div class="flex items-start justify-between">
       <h1 class="text-2xl font-bold break-words pr-4">${escapeHtml(note.title)}</h1>
-      <div class="flex gap-2 shrink-0">
-        <button id="copy-btn" class="btn btn-sm">📋 Copy</button>
-        <button id="edit-btn" class="btn btn-sm">✏️ Edit</button>
-        <button id="delete-btn" class="btn btn-sm btn-error btn-outline">🗑️ Delete</button>
+      <div class="flex gap-1 shrink-0">
+        <button id="copy-btn" class="btn-icon" title="Copy note" aria-label="Copy note">${icon("clipboardDocument")}</button>
+        <button id="edit-btn" class="btn-icon" title="Edit note" aria-label="Edit note">${icon("pencilSquare")}</button>
+        <button id="delete-btn" class="btn-icon text-error" title="Delete note" aria-label="Delete note">${icon("trash")}</button>
       </div>
     </div>
     ${

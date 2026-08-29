@@ -30,7 +30,7 @@ export async function editPage(params) {
       if (!pin) {
         pin = await promptPin("Enter PIN to edit this note");
         if (pin === null) {
-          navigate(`/view?id=${id}`);
+          navigate("/home");
           return;
         }
       }
@@ -41,7 +41,7 @@ export async function editPage(params) {
         rememberUnlock(id, pin); // keep/refresh cache for this note
       } catch (err) {
         toast(err.message, "error");
-        navigate(`/view?id=${id}`);
+        navigate("/home");
         return;
       }
 
@@ -94,7 +94,7 @@ export async function editPage(params) {
         try {
           await api.editNote(id, pin, title, content, tags);
           toast("Note updated and re-encrypted.", "success");
-          navigate(`/view?id=${id}`);
+          navigate("/home"); // REV6: straight back to the list
         } catch (err) {
           errorEl.textContent = err.message;
           errorEl.classList.remove("hidden");

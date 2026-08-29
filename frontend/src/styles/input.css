@@ -4,7 +4,8 @@
 
 @layer components {
   .note-card {
-    @apply bg-base-200 border border-base-300 rounded-xl p-4 hover:border-primary/60 transition-colors cursor-pointer;
+    @apply bg-base-200 border border-base-300 rounded-xl p-4 hover:border-primary/60 transition-colors cursor-pointer relative z-10;
+    touch-action: pan-y;
   }
   .btn-icon {
     @apply btn btn-ghost btn-sm btn-circle;
@@ -18,6 +19,20 @@
   .pin-dot-filled {
     @apply bg-primary;
   }
+
+  /* Swipe-to-delete row (REV2). .note-row clips the delete zone behind
+     .note-card; dragging .note-card right (handled in
+     components/swipeToDelete.js) reveals it. */
+  .note-row {
+    @apply relative rounded-xl overflow-hidden;
+  }
+  .note-row-delete-bg {
+    @apply absolute inset-0 bg-error flex items-center rounded-xl;
+  }
+  .delete-reveal-btn {
+    @apply flex flex-col items-center justify-center gap-0.5 h-full px-4 text-error-content text-xs font-medium;
+  }
+
 
   /* Quill editor: align with DaisyUI theme colors instead of its default
      light-only "snow" palette, so it reads correctly in dark mode too. */

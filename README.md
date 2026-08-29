@@ -55,20 +55,25 @@ sequenceDiagram
 
 ```
 SafeNote/
-  main.go
+  main.go               entry point (must stay at project root for `wails build`)
   internal/
-    crypto/            AES-256-GCM, Argon2id KDF, memory wipe, vault key
-    domain/             entities + sentinel errors
-    repository/         SQLite access, migrations
-    service/             note/settings/backup business logic, lockout
-    app/                 Wails-bound App struct (frontend-facing API)
+    crypto/              AES-256-GCM, Argon2id KDF, memory wipe, vault key
+    domain/              entities + sentinel errors
+    repository/           SQLite access, migrations
+    service/               note/settings/backup business logic, lockout, validation
+    app/                    Wails-bound App struct (frontend-facing API)
   frontend/
-    src/pages/           one module per screen (splash, home, create, ...)
-    src/components/      layout, PIN modal
-    src/api.js            thin wrapper over window.go.app.App
-  docs/ADR.md            key architecture decisions and trade-offs
-  scripts/                build.sh / build.ps1
+    src/pages/             one module per screen (splash, home, create, ...)
+    src/components/        layout, PIN modal
+    src/api.js               thin wrapper over window.go.app.App
+  docs/ADR.md               key architecture decisions and trade-offs
+  scripts/                   build.sh / build.ps1
 ```
+
+> **Note**: `main.go` lives at the project root, not in a `cmd/` folder.
+> Wails v2's CLI (binding generator, `wails build`/`wails dev`) expects to
+> find `package main` alongside `wails.json`; moving it elsewhere causes
+> a `no go file in ..` error during binding generation.
 
 ## Getting started
 
