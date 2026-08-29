@@ -1,5 +1,6 @@
 import { api } from "../api.js";
 import { layout, toast } from "../components/layout.js";
+import { icon } from "../components/icons.js";
 
 export async function restorePage() {
   return {
@@ -13,7 +14,7 @@ export async function restorePage() {
           version + checksum) before anything is imported. Duplicate notes
           are never overwritten automatically.
         </p>
-        <button id="select-btn" class="btn btn-primary self-start">📥 Select Backup File</button>
+        <button id="select-btn" class="btn btn-primary self-start gap-1">${icon("arrowDownTray", "w-4 h-4")} Select Backup File</button>
         <div id="preview-container"></div>
       </div>
       `

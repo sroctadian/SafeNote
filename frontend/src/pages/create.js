@@ -2,6 +2,7 @@ import { api } from "../api.js";
 import { navigate, onCleanup } from "../router.js";
 import { layout, toast } from "../components/layout.js";
 import { createEditor, serializeContent, isContentEmpty } from "../components/richEditor.js";
+import { promptPin, showPinError } from "../components/pinModal.js";
 
 export async function createPage() {
   return {
@@ -18,9 +19,6 @@ export async function createPage() {
         </div>
         <input id="tags-input" type="text" placeholder="Tags (comma separated, max 25 chars each, optional)"
           class="input input-bordered w-full" />
-        <input id="pin-input" type="password" inputmode="numeric" pattern="\d{6}"
-          placeholder="6-digit PIN to encrypt this note"
-          class="input input-bordered w-full" maxlength="6" />
         <p id="form-error" class="text-error text-sm hidden"></p>
         <div class="flex justify-end gap-2">
           <button class="btn btn-ghost" onclick="history.back()">Cancel</button>
@@ -40,11 +38,6 @@ export async function createPage() {
         titleCount.textContent = titleInput.value.length;
       });
 
-      const pinInput = root.querySelector("#pin-input");
-      pinInput.addEventListener("input", () => {
-        pinInput.value = pinInput.value.replace(/\D/g, "").slice(0, 6);
-      });
-
       const save = async () => {
         const title = titleInput.value.trim();
         const content = serializeContent(quill);
@@ -53,11 +46,10 @@ export async function createPage() {
           .value.split(",")
           .map((t) => t.trim())
           .filter(Boolean);
-        const pin = pinInput.value;
         const errorEl = root.querySelector("#form-error");
 
-        if (!title || isContentEmpty(content) || !pin) {
-          errorEl.textContent = "Title, content, and PIN are required.";
+        if (!title || isContentEmpty(content)) {
+          errorEl.textContent = "Title and content are required.";
           errorEl.classList.remove("hidden");
           return;
         }
@@ -66,25 +58,18 @@ export async function createPage() {
           errorEl.classList.remove("hidden");
           return;
         }
-        if (!/^\d{6}$/.test(pin)) {
-          errorEl.textContent = "PIN must be exactly 6 digits (0-9).";
-          errorEl.classList.remove("hidden");
-          return;
-        }
         if (tags.some((t) => t.length > 25)) {
           errorEl.textContent = "Each tag must be at most 25 characters.";
           errorEl.classList.remove("hidden");
           return;
         }
+        errorEl.classList.add("hidden");
 
-        try {
-          await api.createNote(title, content, pin, tags);
-          toast("Note created and encrypted.", "success");
-          navigate("/home");
-        } catch (err) {
-          errorEl.textContent = err.message;
-          errorEl.classList.remove("hidden");
-        }
+        // REV3: PIN is no longer a field inside the form — it's asked
+        // via the same modal used to open an existing note, right when
+        // the user commits to saving. Keeps the writing form itself
+        // free of security chrome until it's actually needed.
+        await promptForPinAndSave(title, content, tags, errorEl);
       };
 
       root.querySelector("#save-btn").addEventListener("click", save);
@@ -98,4 +83,19 @@ export async function createPage() {
       onCleanup(() => document.removeEventListener("keydown", keyHandler));
     },
   };
+}
+
+async function promptForPinAndSave(title, content, tags, errorEl) {
+  const pin = await promptPin("Set a 6-digit PIN to encrypt this note");
+  if (pin === null) return; // user cancelled — stay on the form, nothing lost
+
+  try {
+    await api.createNote(title, content, pin, tags);
+    toast("Note created and encrypted.", "success");
+    navigate("/home"); // REV6: straight back to the list
+  } catch (err) {
+    showPinError(err.message);
+    errorEl.textContent = err.message;
+    errorEl.classList.remove("hidden");
+  }
 }

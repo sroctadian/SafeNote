@@ -1,11 +1,12 @@
 import { api } from "../api.js";
 import { navigate } from "../router.js";
+import logoUrl from "../assets/logo.png";
 
 export async function splashPage() {
   return {
     html: `
       <div class="min-h-screen flex flex-col items-center justify-center gap-4">
-        <div class="text-5xl">🔒</div>
+        <img src="${logoUrl}" alt="SafeNote" class="w-16 h-16" />
         <div class="text-2xl font-bold">SafeNote</div>
         <div class="loading loading-dots loading-md"></div>
       </div>

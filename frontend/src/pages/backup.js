@@ -1,5 +1,6 @@
 import { api } from "../api.js";
 import { layout, toast } from "../components/layout.js";
+import { icon } from "../components/icons.js";
 
 export async function backupPage() {
   return {
@@ -13,7 +14,7 @@ export async function backupPage() {
           decrypts note content during backup — the exported file is exactly
           as protected as your live database.
         </p>
-        <button id="backup-btn" class="btn btn-primary self-start">📤 Export Backup</button>
+        <button id="backup-btn" class="btn btn-primary self-start gap-1">${icon("arrowUpTray", "w-4 h-4")} Export Backup</button>
         <div id="backup-result"></div>
       </div>
       `

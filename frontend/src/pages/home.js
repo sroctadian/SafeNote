@@ -5,6 +5,8 @@ import { promptPin, showPinError } from "../components/pinModal.js";
 import { deltaToPlainText } from "../components/richEditor.js";
 import { forgetUnlock } from "../noteSession.js";
 import { copyToClipboardWithAutoClear } from "../clipboard.js";
+import { icon } from "../components/icons.js";
+import { attachSwipeToDelete } from "../components/swipeToDelete.js";
 
 const state = {
   search: "",
@@ -19,23 +21,31 @@ function noteCardHtml(note) {
   const updated = new Date(note.updatedAt).toLocaleString();
   const created = new Date(note.createdAt).toLocaleDateString();
   return `
-    <div class="note-card" data-id="${note.id}">
-      <div class="flex items-start justify-between">
-        <h3 class="font-semibold truncate pr-2">${escapeHtml(note.title)}</h3>
-        <div class="flex gap-1 shrink-0">
-          <button class="btn-icon fav-btn" data-id="${note.id}" data-fav="${note.favorite}" title="Favorite">
-            ${note.favorite ? "⭐" : "☆"}
-          </button>
-          <button class="btn-icon pin-btn" data-id="${note.id}" data-pinned="${note.pinned}" title="Pin">
-            ${note.pinned ? "📌" : "📍"}
-          </button>
-        </div>
+    <div class="note-row" data-id="${note.id}">
+      <div class="note-row-delete-bg">
+        <button class="delete-reveal-btn" data-id="${note.id}" title="Delete note">
+          ${icon("trash", "w-5 h-5")}
+          <span>Delete</span>
+        </button>
       </div>
-      <div class="text-xs opacity-60 mt-2">Created ${created}</div>
-      <div class="text-xs opacity-60">Updated ${updated}</div>
-      <div class="card-actions justify-end mt-3 gap-1">
-        <button class="btn btn-xs copy-btn" data-id="${note.id}">Copy</button>
-        <button class="btn btn-xs btn-primary open-btn" data-id="${note.id}">Open</button>
+      <div class="note-card" data-id="${note.id}">
+        <div class="flex items-start justify-between">
+          <h3 class="font-semibold truncate pr-2">${escapeHtml(note.title)}</h3>
+          <div class="flex gap-1 shrink-0">
+            <button class="btn-icon fav-btn" data-id="${note.id}" data-fav="${note.favorite}" title="Favorite">
+              ${icon("star", "w-4 h-4", { solid: note.favorite })}
+            </button>
+            <button class="btn-icon pin-btn" data-id="${note.id}" data-pinned="${note.pinned}" title="Pin">
+              ${icon("bookmark", "w-4 h-4", { solid: note.pinned })}
+            </button>
+          </div>
+        </div>
+        <div class="text-xs opacity-60 mt-2">Created ${created}</div>
+        <div class="text-xs opacity-60">Updated ${updated}</div>
+        <div class="card-actions justify-end mt-3 gap-1">
+          <button class="btn-icon copy-btn" data-id="${note.id}" title="Copy">${icon("clipboardDocument", "w-4 h-4")}</button>
+          <button class="btn-icon open-btn" data-id="${note.id}" title="Open">${icon("eye", "w-4 h-4")}</button>
+        </div>
       </div>
     </div>
   `;
@@ -49,7 +59,7 @@ export async function homePage() {
       <div class="flex flex-col gap-4">
         <div class="flex flex-wrap gap-2 items-center justify-between">
           <h1 class="text-2xl font-bold">Your Notes</h1>
-          <button class="btn btn-primary btn-sm" onclick="location.hash='#/create'">➕ New Note</button>
+          <button class="btn btn-primary btn-sm gap-1" onclick="location.hash='#/create'">${icon("plus", "w-4 h-4")} New Note</button>
         </div>
 
         <div class="flex flex-wrap gap-2 items-center">
@@ -69,6 +79,8 @@ export async function homePage() {
             <button id="view-list" class="btn btn-sm join-item ${state.view === "list" ? "btn-active" : ""}">List</button>
           </div>
         </div>
+
+        <div class="text-xs opacity-50 lg:hidden">Tip: swipe a note right to delete it.</div>
 
         <div id="notes-container" class="min-h-[200px]">
           <div class="loading loading-spinner"></div>
@@ -184,12 +196,12 @@ function renderPagination(el, total) {
 }
 
 function attachCardHandlers(root) {
-  // Clicking anywhere on the card opens the note (same as the "Open"
-  // button); icon buttons inside stop propagation so they don't also
-  // trigger a navigation.
-  root.querySelectorAll(".note-card").forEach((card) =>
-    card.addEventListener("click", () => navigate(`/view?id=${card.dataset.id}`))
-  );
+  // REV2: swipe a card right to reveal Delete (no PIN needed — deleting
+  // doesn't decrypt anything). A plain tap opens the note instead.
+  attachSwipeToDelete(root, {
+    onOpen: (id) => navigate(`/view?id=${id}`),
+    onDelete: (id) => deleteNoteFlow(root, id),
+  });
 
   root.querySelectorAll(".open-btn").forEach((btn) =>
     btn.addEventListener("click", (e) => {
@@ -232,6 +244,21 @@ function attachCardHandlers(root) {
       copyNoteFlow(btn.dataset.id);
     })
   );
+}
+
+async function deleteNoteFlow(root, id) {
+  if (!confirm("Delete this note permanently? This cannot be undone.")) {
+    loadAndRender(root); // snap the swiped card back closed
+    return;
+  }
+  try {
+    await api.deleteNote(id);
+    forgetUnlock();
+    toast("Note deleted.", "success");
+    loadAndRender(root);
+  } catch (err) {
+    toast(err.message, "error");
+  }
 }
 
 async function copyNoteFlow(id) {
